@@ -25,14 +25,16 @@ If a slash command like `/day-trader-skill:trader-scanner` is not available, rea
 
 Typical flow: scanner -> news -> entry -> exit -> timemachine -> risk -> budget. Broker is last and needs my explicit yes.
 
-## Memory (persistent state lives in `trader/`)
-Everything the skills save is under `trader/` (config.json, watchlist.json, plan.json, alerts.json, prices.json, state/...).
-- **At the start of every session:** read `trader/config.json`, `trader/watchlist.json` and `trader/journal.md` if they exist,
-  and give me a two-line recap of where we left off.
-- **After useful work:** append a dated entry to `trader/journal.md` (what we scanned, the plan, key numbers, open questions).
-- **At the end of every session:** commit changes under `trader/` with a clear message and push them to the current branch.
-  Then remind me to merge into `main` so the next session starts with this state.
-- Do not commit anything outside `trader/`, `CLAUDE.md` or `.claude/` without asking.
+## Memory
+This repo holds only the stable rules (`CLAUDE.md`, `.claude/`, `trader/config.json`). The live work happens in chat,
+and I continue by reopening the same session. Do NOT try to commit or push; the cloud container cannot, and I do not want it.
+- The skills may write working files under `trader/` (watchlist.json, plan.json, alerts.json, prices.json, state/...) inside the
+  session container. That is fine for the current session; they are not saved to the repo.
+- **At the start of a session:** read `trader/config.json`, confirm paper mode, and if I paste a "state summary", treat it as
+  where we left off.
+- **When I say "save state" or "wrap up":** print a compact state summary I can paste into a new session or keep in my notes:
+  watchlist, any open plan (entry, stop, target, size), alerts, and open questions. Keep it under 25 lines, no secrets.
+- Never ask me to merge a branch or fix git permissions.
 
 ## Setup notes
 - Network access must be allowed in the cloud environment (Yahoo, Stooq, SEC, nasdaqtrader hosts) or data fetches will fail.
